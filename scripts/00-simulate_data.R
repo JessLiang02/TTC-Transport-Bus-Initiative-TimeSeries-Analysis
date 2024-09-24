@@ -35,7 +35,7 @@ test_date_range <- min(simulated_transport_data$Date) == as.Date("2023-11-15") &
 test_date_range  # Should return TRUE if the dates are correct
 
 # Test 2: Ensure that there are no negative values in the "Clients", "Clients_transported", and "Clients_stationary" columns
-test_no_negative_values <- all(simulated_transport_data$Clients >= 0) &&
+test_no_negative_values <- all(simulated_transport_data$Total_clients >= 0) &&
   all(simulated_transport_data$Clients_transported >= 0) &&
   all(simulated_transport_data$Clients_stationary >= 0)
 test_no_negative_values  # Should return TRUE if no negative values exist
@@ -43,6 +43,6 @@ test_no_negative_values  # Should return TRUE if no negative values exist
 # Test 3: Check that Total clients is always equal to the sum of Clients transported and Clients stationary
 test_clients_sums <- all(simulated_transport_data$Total_clients ==
                            (simulated_transport_data$Clients_transported + simulated_transport_data$Clients_stationary))
-stest_clients_sums  # Should return TRUE if the sums are valid
+test_clients_sums  # Should return TRUE if the sums are valid
 
 

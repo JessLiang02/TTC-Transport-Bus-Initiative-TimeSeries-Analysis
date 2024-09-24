@@ -1,13 +1,10 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
-author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: LINK."
+title: "Assessing the Impact of the Toronto Transit Commission Transport Bus Initiative: Rising Demand and Shelter Capacity Challenges During Winter 2023-2024"
+author: "Jing Liang"
+thanks: "Code and data are available at: https://github.com/JessLiang02/TTC-Transport-Bus-Initiative-TimeSeries-Analysis.git"
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This paper conducts an analysis on the daily usage of the TTC Transport Bus Initiative, launched to give transportation and temporary shelter for homeless individuals during winter in Toronto. We discovered that despitat that  demand for the service went up over time, many individuals were stationary because of shelter capacity limitations, with fewer clients being relocated to warming centers. These findings illustrate the challenges in logistics encountered by the initiative and stress the requirement for better shelter capacity and transportation public health interventions in the future. This analysis informs better planning for similar services in extreme weather conditions."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -19,199 +16,147 @@ bibliography: references.bib
 #| message: false
 
 library(tidyverse)
-library(palmerpenguins)
+library(here)
+library(modelsummary)
 ```
-
 
 # Introduction
 
-You can and should cross-reference sections and sub-sections. We use @citeR and @rohan.
+The Toronto Transit Commission (TTC) Transport Bus Initiative was launched in response to the rising need to give shelter and transportation for homeless individuals during the winter in Toronto. Running from November 2023 to April 2024, the initiative deployed buses at Union and Spadina Stations to offer transportation to warming centers and shelters, and also intermission at Spadina Station when shelters were full. The main objective was to relieve the pressures of cold weather on vulnerable groups by providing safe and accessible options for warmth and transportation overnight.
 
-The remainder of this paper is structured as follows. @sec-data....
+There has been limited analysis of the program's usage patterns and overall effectiveness. The dataset gathered from this program provides an opportunity to investigate daily patterns in service usage, including the number of total clients who used the service, those transported to shelters, and those who remained stationary in one of the stations. Studying these patterns not only helps understand program utilization but also illustrates logistical difficulties, such as shelter capacity constraints, which might have affected the program's effectiveness.
 
+This study examines daily data from the TTC Transport Bus Initiative, with an angle on the distributions of and relationships between total clients, transported clients, and stationary clients. We examine variations in service demand and the impacts of shelter capacity limitations. The findings of this analysis reveal critical patterns in service usage and inform how the program adapted to changing needs throughout the winter. These findings are vital for informing implementations of provision of support to homeless individuals in similar conditions.
 
+For this analysis, we use `R` for all numerical computations and data visualizations (@citeR), along with the `tidyverse` suite of packages for data processing and graphing  (@citetidyverse). The `opendatatoronto` package was used to retrieve open data provided by the City of Toronto pertinent to the Transport Bus Initiative (@citeopendatatoronto). Furthermore, the `modelsummary` package was utilized for constructing and formating tables and summary statistics (@citemodelsummary), and the `here` package facilitated reproducibility by handling file path management (@citehere).
+
+The remainder of this paper is structured as follows: in @sec-data, we introduce the dataset and explain the variables used in the analysis. This is followed by a detailed examination of patterns and trends identified through data visualizations and tabular summaries of key characteristics. We conclude with a discussion of the findings in the context of broader challenges encountered by the program and provide recommendations for future policy decisions and service improvements. 
 
 # Data {#sec-data}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+## Data Source and Context
+
+The dataset analyzed in this study came from the TTC Transport Bus Initiative that operated between November 15, 2023, and April 15, 2024. The program was launched to respond to the rising number of homeless individuals using Toronto's transit system, the TTC, during the winter months. Throughout this period, buses were stationed at Union and Spadina Stations to transport individuals to shelters and warming centers. When these centers hit capacity, buses stayed at Spadina Station to provide temporary respite.
+
+The dataset contains daily records on the number of "Total clients," "Clients transported" to shelters, and those who were stationary. No personal data was recorded, guaranteeing anonymity of the clients. But this also limits the ability to track unique clients over multiple days, as the same client may have used the service on numerous occasions. Nonetheless, the dataset provides information on the scale and details of the program.
+
+## Ethical and Analytical Considerations
+
+The non-collection of personal information, which safeguards the privacy and dignity of individuals using the service, aligns with ethical standards.. This aligns with ethical standards concerning data collection from vulnerable populations. From an analytical perspective, the dataset contains aggregate daily counts, rendering it suitable for time-series analysis and trend assessment. But the lack of individual-level data is a limitation in evaluating the longitudinal service usage by the same clients across different periods.
+
+The sections that ensue will give a detailed overview of the variables, their distributions, and the relationships among them, illustrated through visualizations and tabular representations.
+
+## Variable Definitions and Descriptions
+
+The dataset contains three key variables: "Total clients," representing the number of individuals using the service each day; "Clients transported," denoting those taken to shelters or warming centers; and "Clients stationary," referring to those who remained at Spadina Station because of limited shelter capacity. Each variable is a straightforward count. Also, the dataset has a "Date" variable that records the date of each service observation. 
+
+## Visualization of the Data
 
 ```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
+#| include: false
+#| warning: false
+#| message: false
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
+# Read the data in
+ttc_data <-
+  read_csv(
+    file = here::here("data","raw_data", "ttc_bus_rawdata.csv"),
+    show_col_types = FALSE
+  )
+```
+
+```{r}
+#| label: fig-timeseries
+#| fig-cap: "Time Series of Total clients, Clients transported, and Clients stationary, based on the Transport Bus Initiative Usage."
+#| echo: false
+#| warning: false
+#| message: false
+
+# Time series graph of "Total clients", "Clients transported", and "Clients stationary"
+ttc_data |> ggplot(aes(x = Date)) +
+  geom_line(aes(y = Clients, color = "Total clients"), size = 1) +
+  geom_line(aes(y = Clients.transported, color = "Clients transported"), size = 1) +
+  geom_line(aes(y = Clients.stationary, color = "Clients stationary"), size = 1, linetype = "dashed") +
+  scale_color_manual(values = c(
+    "Total clients" = "purple3",         
+    "Clients transported" = "green3",   
+    "Clients stationary" = "gold1"     
+  )) +
+  labs(
+    x = "Date",
+    y = "Number of Clients",
+    color = "Client Category",
+  ) +
   theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+  theme(
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8)
+  )
+
 ```
 
-Talk more about it.
+@fig-timeseries illustrates the daily usage patterns of the TTC Transport Bus Initiative from November 2023 to April 2024, focusing on "Total clients," "Clients transported," and "Clients stationary." The "Total clients" (purple) line shows a consistent rise throughout the winter, indicating growing demand as colder weather set in. This upward trend suggests that worsening outdoor conditions led more individuals to rely on the service.
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+The "Clients stationary" (yellow) line closely mirrors the "Total clients," with significant overlap. This demonstrates that while more clients looked to use the service, many could not be transported and had to remain at Spadina Station. The close alignment between these two lines reflects shelter capacity limits, which forced many to stay on-site instead of being transported to warmer locations. On the contrary, the "Clients transported" (green) line stays relatively low and sporadic. While there are occasional spikes early in the program, the number of transported clients decreases over time. This implies that as the program progressed, fewer clients were transported elsewhere, likely due to shelters and warming centers being at capacity more often. The combination of a lower transport rate and an increasing number of stationary clients demonstrates that the program increasingly served as a temporary shelter at Spadina Station.
 
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
-#| echo: false
-#| warning: false
-#| message: false
-
-analysis_data <- read_csv(here::here("data/analysis_data/analysis_data.csv"))
-
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
-```
-
-Talk way more about it. 
-
-
-
-# Model
-
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
-
-## Model set-up
-
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
-
-# Results
-
-Our results are summarized in @tbl-modelresults.
-
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
-
-library(rstanarm)
-
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
-
-
-
-# Discussion
-
-## First discussion point {#sec-first-point}
-
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
-
-\newpage
-
-\appendix
-
-# Appendix {-}
-
-
-# Additional data details
-
-# Model details {#sec-model-details}
-
-## Posterior predictive check
-
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
+In summary, the plot illustrates the crucial role of the program during winter, demsontrating both the rising reliance on the service and the constraints due to shelter capacity. The program provided shelter for clients who had to remain stationary when transportation was not available.
 
 ```{r}
 #| eval: true
-#| echo: false
-#| message: false
+#| label: fig-histogram
+#| fig-cap: "Distributions of Total clients, Clients transported, and Clients stationary, based on the Transport Bus Initiative Usage."
+#| fig-subcap: ["Total clients", "Clients transported", "Clients stationary"]
+#| layout-ncol: 3
 #| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
+#| message: false
+#| echo: false
 
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
+# panel (a)
+ggplot(ttc_data, aes(x = Clients)) +
+  geom_histogram() +
+  labs(x = "Total clients", y = "Count") +
+  theme_minimal()
+# panel (b)
+ggplot(ttc_data, aes(x = Clients.transported )) +
+  geom_histogram() +
+  labs(x = "Clients transported", y = "Count") +
+  theme_minimal()
+# panel (c)
+ggplot(ttc_data, aes(x = Clients.stationary)) +
+  geom_histogram() +
+  labs(x = "Clients stationary", y = "Count") +
+  theme_minimal()
 ```
 
-## Diagnostics
+@fig-histogram provides a detailed overview of the daily usage patterns of the TTC Transport Bus Initiative.
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+In @fig-histogram-1, we observe a wide range of client counts, with some days seeing fewer than 10 clients, while others exceeded 75. This variability suggests that demand fluctuated throughout the period, likely influenced by external factors such as weather conditions or the availability of shelter space. Peaks between 50 and 75 clients indicate particularly high demand on certain days.
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+@fig-histogram-2, on the other hand, reveals that most days had very few individuals transported to warming centers or shelters, with the majority of days showing only 0–1 clients transported. This suggests that the transport services were underutilized, possibly due to limited shelter availability or logistical challenges. Days with higher numbers of transported clients were relatively rare, reinforcing the idea that capacity limitations affected the transport process.
+
+@fig-histogram-3 shows that many individuals remained at Spadina Station, with stationary counts frequently ranging between 25 and 75 clients. This closely mirrors the trend seen in Total clients, indicating that when demand was high, many clients had to stay at the station, likely due to shelters reaching full capacity.
+
+In summary, @fig-histogram-1, @fig-histogram-2, and @fig-histogram-3 collectively highlight the fluctuating demand for the service and the significant number of clients who remained stationary. These figures underscore the challenges the initiative faced in accommodating all individuals, particularly when shelter capacity was limited.
 
 ```{r}
-#| echo: false
-#| eval: true
-#| message: false
+#| label: tbl-ttc
+#| tbl-cap: "Summary Statistics of key variables in the TTC Transport Bus Initiative Usage."
 #| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
+#| message: false
+#| echo: false
 
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
+# Compute and display summary statistics in tabular format
+ttc_data |>
+  select(-c(X_id, Date)) |> 
+  rename(`Total clients`= Clients,
+         `Clients transported` = Clients.transported,
+         `Clients stationary` = Clients.stationary) %>%
+  datasummary_skim(histogram = FALSE)
 ```
 
+@tbl-ttc displays summary statistics for "Total clients," "Clients transported," and "Clients stationary." Both "Total clients" and "Clients stationary" have similar distributions, with means around 38 and medians of 41, demonstrating that most people were stationary at Spadina Station. On the contrary, "Clients transported" has a much smaller mean of 0.6 and a median of 0, indicating minimal transportation to shelters, probably because of capacity limitations. The high variations in stationary individuals demonstrate the program's role in providing temporary respite, which serves as temporary shelter, at the station.
 
+In conclusion, the analysis showcases the growing reliance on the TTC Transport Bus Initiative during the winter months, with the majority of clients remaining stationary because of limited shelter capacity. The low transport rates lead to logistical issues in transporting people to warming centers. These findings stress the requirement for improved shelter capacity and transportation to better support vulnerable populations in future interventions.
 
 \newpage
 
