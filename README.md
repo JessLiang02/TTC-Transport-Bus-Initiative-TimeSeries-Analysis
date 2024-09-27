@@ -1,30 +1,23 @@
-# Starter folder
+# TTC Transport Bus Initiative Analysis
 
 ## Overview
 
-This repo provides students with a foundation for their own projects associated with *Telling Stories with Data*. You do not need every aspect for every paper and you should delete aspects that you do not need.
+This repository provides the foundation for analyzing the TTC Transport Bus Initiative, which operated during the winter of 2023-2024 to support homeless individuals in Toronto. The project examines service usage patterns, focusing on the number of clients served, those transported to shelters, and those who remained stationary. This analysis aims to inform future interventions for vulnerable populations during extreme weather conditions. You may customize or remove aspects of this project as needed to suit your specific analysis objectives.
 
 
 ## File Structure
 
 The repo is structured as:
 
--   `data/raw_data` contains the raw data as obtained from X.
--   `data/analysis_data` contains the cleaned dataset that was constructed.
--   `model` contains fitted models. 
--   `other` contains relevant literature, details about LLM chat interactions, and sketches.
+-   `data/00-simulated_data` contains simulated data in the process of understanding the analysis data.
+-   `data/01-raw_data` contains the raw data as obtained from Open Data Toronto.
+-   `data/02-analysis_data` contains the cleaned dataset that was constructed.
+-   `other` contains relevant sketches.
 -   `paper` contains the files used to generate the paper, including the Quarto document and reference bibliography file, as well as the PDF of the paper. 
 -   `scripts` contains the R scripts used to simulate, download and clean data.
 
 
 ## Statement on LLM usage
 
-Aspects of the code were written with the help of the auto-complete tool, Codriver. The abstract and introduction were written with the help of ChatHorse and the entire chat history is available in inputs/llms/usage.txt.
+No language models or AI tools were used in the creation of this project. All code, writing, and analysis are original and solely the result of independent work.
 
-## Some checks
-
-- [ ] Change the rproj file name so that it's not starter_folder.Rproj
-- [ ] Change the README title so that it's not Starter folder
-- [ ] Remove files that you're not using
-- [ ] Update comments in R scripts
-- [ ] Remove this checklist

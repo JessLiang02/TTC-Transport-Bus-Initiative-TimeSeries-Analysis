@@ -26,9 +26,9 @@ The Toronto Transit Commission (TTC) Transport Bus Initiative was launched in re
 
 There has been limited analysis of the program's usage patterns and overall effectiveness. The dataset gathered from this program provides an opportunity to investigate daily patterns in service usage, including the number of total clients who used the service, those transported to shelters, and those who remained stationary in one of the stations. Studying these patterns not only helps understand program utilization but also illustrates logistical difficulties, such as shelter capacity constraints, which might have affected the program's effectiveness.
 
-This study examines daily data from the TTC Transport Bus Initiative, with an angle on the distributions of and relationships between total clients, transported clients, and stationary clients. We examine variations in service demand and the impacts of shelter capacity limitations. The findings of this analysis reveal critical patterns in service usage and inform how the program adapted to changing needs throughout the winter. These findings are vital for informing implementations of provision of support to homeless individuals in similar conditions.
+This study fills a gap by analyzing daily data from the TTC Transport Bus Initiative, focusing on total clients served, those transported to shelters, and those who remained stationary at Spadina Station. The analysis reveals growing demand for services, but capacity constraints left many without shelter. The findings highlight the need to improve transportation and shelter logistics, as shelter capacity was often insufficient. Specifically, while the number of clients served increased throughout the winter, the number transported to shelters remained low, forcing many to stay at Spadina Station. This imbalance underscores the importance of expanding shelter capacity and enhancing transport logistics in future interventions.
 
-For this analysis, we use `R` for all numerical computations and data visualizations (@citeR), along with the `tidyverse` suite of packages for data processing and graphing  (@citetidyverse). The `opendatatoronto` package was used to retrieve open data provided by the City of Toronto pertinent to the Transport Bus Initiative (@citeopendatatoronto). Furthermore, the `modelsummary` package was utilized for constructing and formating tables and summary statistics (@citemodelsummary), and the `here` package facilitated reproducibility by handling file path management (@citehere).
+For this analysis, we use `R` for all numerical computations and data visualizations (@citeR), along with the `tidyverse` suite of packages for data processing and graphing  (@citetidyverse). The `opendatatoronto` package was used to retrieve open data provided by the City of Toronto pertinent to the Transport Bus Initiative (@citeopendatatoronto). Furthermore, the `modelsummary` package was utilized for constructing and formating tables and summary statistics (@citemodelsummary), and the `here` package facilitated reproducibility by handling file path management (@citehere). Most importantly, the analysis infrastructure was adapted from the content in @alexander2023telling.
 
 The remainder of this paper is structured as follows: in @sec-data, we introduce the dataset and explain the variables used in the analysis. This is followed by a detailed examination of patterns and trends identified through data visualizations and tabular summaries of key characteristics. We conclude with a discussion of the findings in the context of broader challenges encountered by the program and provide recommendations for future policy decisions and service improvements. 
 
@@ -60,7 +60,7 @@ The dataset contains three key variables: "Total clients," representing the numb
 # Read the data in
 ttc_data <-
   read_csv(
-    file = here::here("data","raw_data", "ttc_bus_rawdata.csv"),
+    file = here::here("data","02-analysis_data", "ttc_bus_cleandata.csv"),
     show_col_types = FALSE
   )
 ```
@@ -147,7 +147,7 @@ In summary, @fig-histogram-1, @fig-histogram-2, and @fig-histogram-3 collectivel
 
 # Compute and display summary statistics in tabular format
 ttc_data |>
-  select(-c(X_id, Date)) |> 
+  select(-c(Date)) |> 
   rename(`Total clients`= Clients,
          `Clients transported` = Clients.transported,
          `Clients stationary` = Clients.stationary) %>%
