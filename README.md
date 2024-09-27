@@ -14,7 +14,7 @@ The repo is structured as:
 -   `data/02-analysis_data` contains the cleaned dataset that was constructed.
 -   `other` contains relevant sketches.
 -   `paper` contains the files used to generate the paper, including the Quarto document and reference bibliography file, as well as the PDF of the paper. 
--   `scripts` contains the R scripts used to simulate, download and clean data.
+-   `scripts` contains the R scripts used to simulate, download, clean, and test data.
 
 
 ## Statement on LLM usage
